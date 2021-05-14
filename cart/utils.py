@@ -24,6 +24,5 @@ def get_or_set_order_session(request):
     if request.user.is_authenticated and order.user is None:
         # assign the order user to the user that requested the order
         order.user = request.user
-        # save the order
         order.save()
     return order

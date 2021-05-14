@@ -33,7 +33,7 @@ class ProductDetailView(generic.FormView):
         # if an item is already in the cart, increase the quantity of that item
         if item_filter.exists():
             item = item_filter.first()
-            item.quantity = int(form.cleaned_data['quantity'])
+            item.quantity += int(form.cleaned_data['quantity'])
             item.save()
 
         # if the item is not already in the cart, add it to the cart
@@ -81,4 +81,11 @@ class DecreaseQuantityView(generic.View):
         else:
             order_item.quantity -= 1
             order_item.save()
+        return redirect("cart:summary")
+
+
+class RemoveFromCartView(generic.View):
+    def get(self, request, *args, **kwargs):
+        order_item = get_object_or_404(OrderItem, id=kwargs['pk'])
+        order_item.delete()
         return redirect("cart:summary")

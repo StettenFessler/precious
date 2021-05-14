@@ -105,8 +105,34 @@ class Order(models.Model):
     def reference_number(self):
         return f"ORDER-{self.pk}"
 
+    def get_raw_subtotal(self):
+        total = 0
+        # sums all items in cart
+        for order_item in self.items.all():
+            total += order_item.get_raw_total_item_price()
+        return total
+
+    def get_subtotal(self):
+        subtotal = self.get_raw_subtotal()  # this will be in cents
+        # convert cents value to dollars
+        return "{:.2f}".format(subtotal / 100)
+
+    def get_raw_total(self):
+        subtotal = self.get_raw_subtotal()
+        # add tax, add delivery, subtract discounts
+        # total = subtotal - discounts + tax + delivery
+        tax = .0725 * subtotal
+        subtotal += tax
+        return subtotal
+
+    def get_total(self):
+        total = self.get_raw_subtotal()  # this will be in cents
+        # convert cents value to dollars
+        return "{:.2f}".format(total / 100)
 
 # records all of the attempted payments on an order
+
+
 class Payment(models.Model):
     # every payment is linked to an order
     order = models.ForeignKey(Order, on_delete=models.CASCADE,

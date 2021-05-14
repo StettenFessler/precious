@@ -60,7 +60,7 @@
                                         ${{ item.get_total_item_price }}
                                     </td>
                                     <td>
-                                        <a href="#" class="btn btn-primary btn-sm">X</a>
+                                        <a href="{% url 'cart:remove-from-cart' item.id %}" class="btn btn-primary btn-sm">X</a>
                                     </td>
                                 </tr>
                                 {% empty %}
@@ -76,6 +76,62 @@
                 </div>
             </div>
         </div>
+        
+        <!-- generates sidebar if the cart has items-->
+        {% if order.items.count > 0 %}
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row mb-5">
+                        <div class="col-md-12">
+                            <a class="btn btn-outline-primary btn-sm btn-block"
+                                href="{% url 'cart:product-list' %}">Continue shopping</a>
+                        </div>
+                    </div>
+                </div>
+           
+
+                <div class="col-md-6 pl-5">
+                    <div class="row justify-content-end">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-md-12 text-right border-bottom mb-5">
+                                    <h3 class="text-black h4 text-uppercase">Cart Total</h3>
+                                </div>
+                            </div>
+                            
+                            <!--
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <span class="text-black">Subtotal</span>
+                                </div>
+                                <div class="col-md-6 text-right">
+                                    <strong class="text-black">${{ order.get_subtotal }}</strong>
+                                </div>
+                            </div>
+                            -->
+
+                            <div class="row mb-5">
+                                <div class="col-md-6">
+                                    <span class="text-black">Total</span>
+                                </div>
+                                <div class="col-md-6 text-right">
+                                    <strong class="text-black">${{ order.get_total }}</strong>
+                                </div>
+                            </div>
+
+                            
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <a class="btn btn-primary btn-lg py-3 btn-block" href="#">Proceed to checkout</a>
+                                </div>                    
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+        </div>
+        {% endif %}
+
     </div>
 </div>
 
