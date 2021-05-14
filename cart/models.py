@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models.signals import pre_save
+from django.shortcuts import reverse
 from django.utils.text import slugify
 
 User = get_user_model()
@@ -34,6 +35,8 @@ class Product(models.Model):
     title = models.CharField(max_length=150)
     slug = models.SlugField(unique=True)
     description = models.TextField()
+    # price will be set in cents
+    price = models.IntegerField(default=0)
     image = models.ImageField(upload_to='product_images')
     # stores the date the product was created
     created = models.DateTimeField(auto_now_add=True)
@@ -44,8 +47,18 @@ class Product(models.Model):
     def __str__(self):
         return self.title
 
+    def get_absolute_url(self):
+        return reverse("cart:product-detail", kwargs={'slug': self.slug})
+
+    # gets the price to display
+    def get_price(self):
+        # price will always be display with 2 decmials
+        # divide by 100 so that cents is converted into dollars
+        return "{:.2f}".format(self.price / 100)
 
 # these are products that have been added to the cart
+
+
 class OrderItem(models.Model):
     # links an order item to a specfic order
     order = models.ForeignKey(
@@ -58,11 +71,19 @@ class OrderItem(models.Model):
     def __str__(self):
         return f"{self.quantity} x {self.product.title}"
 
+    def get_raw_total_item_price(self):
+        return self.quantity * self.product.price
+
+    def get_total_item_price(self):
+        price = self.get_raw_total_item_price()  # this will be in cents
+        return "{:.2f}".format(price / 100)  # convert cents value to dollars
+
 
 # all of the OrderItems within the cart
 class Order(models.Model):
     # if user is deleted, there won't be any orders for that user
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User, blank=True, null=True, on_delete=models.CASCADE)
     # stores the date the order was created
     start_date = models.DateTimeField(auto_now_add=True)
     # stores the date an order was payed for
@@ -111,7 +132,7 @@ class Payment(models.Model):
 def pre_save_product_receiver(sender, instance, *args, **kwargs):
     # if a slug is not set for a product
     if not instance.slug:
-        # create a slug from the title
+        # create a slug from the title automatically
         instance.slug = slugify(instance.title)
 
 
